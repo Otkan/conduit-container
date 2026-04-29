@@ -1,6 +1,6 @@
 # Conduit Fullstack App (Docker Setup)
 
-## 📚 Table of Contents
+## Table of Contents
 
 * [Overview](#-overview)
 * [Repository Purpose](#-repository-purpose)
@@ -18,7 +18,7 @@
 
 ---
 
-## 📌 Overview
+## Overview
 
 This repository contains a containerized fullstack web application based on the RealWorld "Conduit" example.
 
@@ -31,7 +31,7 @@ It includes:
 
 ---
 
-## 🎯 Repository Purpose
+## Repository Purpose
 
 The purpose of this repository is to demonstrate how a modern fullstack application can be:
 
@@ -44,7 +44,7 @@ It is designed as a learning project to understand container orchestration and f
 
 ---
 
-## ⚙️ Tech Stack
+## Tech Stack
 
 * Frontend: Angular
 * Backend: Django + Gunicorn
@@ -53,7 +53,7 @@ It is designed as a learning project to understand container orchestration and f
 
 ---
 
-## ⚡ Quickstart
+## Quickstart
 
 ### Prerequisites
 
@@ -73,7 +73,7 @@ docker compose up -d --build
 
 ---
 
-## 🧰 Usage
+## Usage
 
 ### Environment Configuration
 
@@ -147,7 +147,7 @@ environment.apiUrl
 
 ---
 
-## 🏗 Architecture
+## Architecture
 
 ```
 [ Browser ]
@@ -161,7 +161,7 @@ environment.apiUrl
 
 ---
 
-## 🐳 Services
+## Services
 
 ### Database
 
@@ -181,7 +181,7 @@ environment.apiUrl
 
 ---
 
-## 🔁 Restart Policy
+## Restart Policy
 
 All services use:
 
@@ -191,7 +191,7 @@ restart: unless-stopped
 
 ---
 
-## 🛠 Useful Commands
+## Useful Commands
 
 ### Stop containers
 
@@ -213,7 +213,7 @@ docker compose logs -f
 
 ---
 
-## ⚠️ Notes
+## Notes
 
 * The API URL is not secret and is visible in the browser after build
 * Changes in `.env` require rebuilding the containers
@@ -222,7 +222,7 @@ docker compose logs -f
 
 ---
 
-## ✅ Status
+## Status
 
 * Application runs successfully
 * Frontend ↔ Backend communication works

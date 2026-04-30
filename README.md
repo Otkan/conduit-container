@@ -1,61 +1,24 @@
-# Conduit Fullstack App (Docker Setup)
+# Conduit Containerized Application
+
+This repository contains a containerized version of the Conduit application.
+It consists of a frontend (Angular), a backend (Django), and a PostgreSQL database, all orchestrated using Docker Compose.
+
+The goal of this project is to demonstrate containerization, multi-stage builds, environment-based configuration, and service orchestration.
+
+---
 
 ## Table of Contents
 
-* [Overview](#-overview)
-* [Repository Purpose](#-repository-purpose)
-* [Tech Stack](#-tech-stack)
-* [Quickstart](#-quickstart)
-* [Usage](#-usage)
-
-  * [Environment Configuration](#environment-configuration)
-  * [Changing Ports](#changing-ports)
-  * [Changing API URL](#changing-api-url)
-* [Architecture](#-architecture)
-* [Services](#-services)
-* [Useful Commands](#-useful-commands)
-* [Notes](#-notes)
-
----
-
-## Overview
-
-This repository contains a containerized fullstack web application based on the RealWorld "Conduit" example.
-
-It includes:
-
-* A frontend built with Angular
-* A backend API built with Django
-* A PostgreSQL database
-* A Docker-based deployment setup
-
----
-
-## Repository Purpose
-
-The purpose of this repository is to demonstrate how a modern fullstack application can be:
-
-* Containerized using Docker
-* Configured via environment variables
-* Structured into independent services
-* Deployed in a reproducible way
-
-It is designed as a learning project to understand container orchestration and fullstack integration.
-
----
-
-## Tech Stack
-
-* Frontend: Angular
-* Backend: Django + Gunicorn
-* Database: PostgreSQL
-* Containerization: Docker & Docker Compose
+* [Quickstart](#quickstart)
+* [Usage](#usage)
+* [Configuration](#configuration)
+* [Repository Contents](#repository-contents)
 
 ---
 
 ## Quickstart
 
-### Prerequisites
+### Requirements
 
 * Docker
 * Docker Compose
@@ -63,168 +26,104 @@ It is designed as a learning project to understand container orchestration and f
 ### Start the application
 
 ```bash
+cp .env.example .env
 docker compose up -d --build
 ```
 
-### Access
+### Access the application
 
 * Frontend: http://localhost:8282
-* Backend: http://localhost:8000/api
+* Backend API: http://localhost:8001/api
 
 ---
 
 ## Usage
 
-### Environment Configuration
-
-Create a `.env` file in the root directory:
-
-```env
-POSTGRES_DB=conduit
-POSTGRES_USER=conduit
-POSTGRES_PASSWORD=supersecurepassword
-POSTGRES_HOST=database
-POSTGRES_PORT=5432
-
-BACKEND_PORT=8000
-FRONTEND_PORT=8282
-
-FRONTEND_API_URL=http://localhost:8000/api
-```
-
----
-
-### Changing Ports
-
-You can change exposed ports by modifying:
-
-```env
-BACKEND_PORT=9000
-FRONTEND_PORT=3000
-```
-
-Then rebuild:
+### Start services
 
 ```bash
-docker compose up -d --build
+docker compose up -d
 ```
 
----
-
-### Changing API URL
-
-The frontend API URL is injected during build time.
-
-To change it:
-
-```env
-FRONTEND_API_URL=http://your-server-ip:8000/api
-```
-
-Rebuild required:
-
-```bash
-docker compose up -d --build
-```
-
----
-
-### How Configuration Works
-
-1. `.env` defines variables
-2. Docker Compose passes them as build arguments
-3. Dockerfile injects them into Angular via:
-
-```dockerfile
-sed -i "s|__API_URL__|${FRONTEND_API_URL}|g"
-```
-
-4. Angular uses:
-
-```ts
-environment.apiUrl
-```
-
----
-
-## Architecture
-
-```
-[ Browser ]
-     ↓
-[ Frontend (Angular) ]
-     ↓ HTTP
-[ Backend (Django API) ]
-     ↓
-[ PostgreSQL Database ]
-```
-
----
-
-## Services
-
-### Database
-
-* Image: postgres:15-alpine
-* Persistent volume storage
-
-### Backend
-
-* Django REST API
-* Runs via Gunicorn
-* Port: 8000
-
-### Frontend
-
-* Angular app served by Nginx
-* Port: 8282
-
----
-
-## Restart Policy
-
-All services use:
-
-```yaml
-restart: unless-stopped
-```
-
----
-
-## Useful Commands
-
-### Stop containers
+### Stop services
 
 ```bash
 docker compose down
 ```
 
-### Rebuild
+### Rebuild containers
 
 ```bash
 docker compose up -d --build
 ```
 
-### Logs
+### View logs
 
 ```bash
 docker compose logs -f
 ```
 
+### Test API
+
+```bash
+curl http://localhost:8001/api/articles
+curl http://localhost:8001/api/tags
+```
+
+---
+
+## Configuration
+
+Configuration is handled via the `.env` file.
+
+### Important variables
+
+```env
+POSTGRES_DB=conduit
+POSTGRES_USER=conduit
+POSTGRES_PASSWORD=your_password
+POSTGRES_HOST=database
+POSTGRES_PORT=5432
+
+BACKEND_PORT=8001
+FRONTEND_PORT=8282
+
+FRONTEND_API_URL=http://localhost:8001/api
+```
+
+### Notes
+
+* `FRONTEND_API_URL` is injected during the frontend build process
+* No sensitive data is stored in the repository
+* `.env` is ignored via `.gitignore`
+
+---
+
+## Repository Contents
+
+```
+.
+├── conduit-backend/        # Django backend
+├── conduit-frontend/       # Angular frontend
+├── docker-compose.yaml     # Service orchestration
+├── .env.example            # Example configuration
+├── README.md               # Documentation
+```
+
+---
+
+## Architecture Overview
+
+* **Frontend:** Angular app served via Nginx
+* **Backend:** Django application running with Gunicorn (WSGI)
+* **Database:** PostgreSQL with persistent volume
+* **Networking:** Internal Docker network
+
 ---
 
 ## Notes
 
-* The API URL is not secret and is visible in the browser after build
-* Changes in `.env` require rebuilding the containers
-* Styling is loaded via external CDN
-* CORS issues are resolved via backend configuration
-
----
-
-## Status
-
-* Application runs successfully
-* Frontend ↔ Backend communication works
-* No CORS issues
-* Configurable via environment variables
+* The backend uses Gunicorn instead of Django’s development server
+* Multi-stage builds are used for both frontend and backend
+* Restart policy is set to `unless-stopped` for stability
+* Database data is persisted using Docker volumes

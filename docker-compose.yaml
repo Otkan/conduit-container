@@ -1,0 +1,51 @@
+services:
+  database:
+    image: postgres:15-alpine
+    container_name: conduit-database
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-conduit}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - database_data:/var/lib/postgresql/data
+    networks:
+      - conduit_net
+
+  backend:
+    build:
+      context: ./conduit-backend
+    container_name: conduit-backend
+    restart: unless-stopped
+    depends_on:
+      - database
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-conduit}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_HOST: ${POSTGRES_HOST:-database}
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    networks:
+      - conduit_net
+
+  frontend:
+    build:
+      context: ./conduit-frontend
+      args:
+        FRONTEND_API_URL: ${FRONTEND_API_URL:-http://localhost:8000/api}
+    container_name: conduit-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "${FRONTEND_PORT:-8282}:80"
+    networks:
+      - conduit_net
+
+volumes:
+  database_data:
+
+networks:
+  conduit_net:

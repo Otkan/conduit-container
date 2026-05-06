@@ -14,7 +14,23 @@ export class ApiInterceptor implements HttpInterceptor {
     req: HttpRequest<any>,
     next: HttpHandler
   ): Observable<HttpEvent<any>> {
-    const apiReq = req.clone({ url: `${environment.apiUrl}${req.url}` });
+
+    let url = req.url;
+
+    //feed endpoint needs trailing slash
+    if (url.startsWith("/articles/feed")) {
+      url = url.replace("/articles/feed", "/articles/feed/");
+    }
+
+    //remove trailing slash (except feed)
+    else if (url.endsWith("/")) {
+      url = url.slice(0, -1);
+    }
+
+    const apiReq = req.clone({
+      url: `${environment.apiUrl}${url}`,
+    });
+
     return next.handle(apiReq);
   }
 }

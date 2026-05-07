@@ -1,36 +1,74 @@
 # Conduit Containerized Application
 
-This repository contains a containerized version of the Conduit application.
-It consists of a frontend (Angular), a backend (Django), and a PostgreSQL database, all orchestrated using Docker Compose.
-
-The goal of this project is to demonstrate containerization, multi-stage builds, environment-based configuration, and service orchestration.
+A fully containerized version of the Conduit application using Docker Compose.
+The project consists of a frontend (Angular), backend (Django), and a PostgreSQL database, all running as isolated services.
 
 ---
 
 ## Table of Contents
 
+* [Architecture Overview](#architecture-overview)
+* [Prerequisites](#prerequisites)
 * [Quickstart](#quickstart)
 * [Usage](#usage)
+* [Test API](#test-api)
 * [Configuration](#configuration)
-* [Repository Contents](#repository-contents)
+* [Repository Structure](#repository-structure)
+* [Implementation Details](#implementation-details)
+* [Notes](#notes)
+* [Summary](#summary)
+
+---
+
+## Architecture Overview
+
+* Frontend: Angular application served via Nginx
+* Backend: Django application running with Gunicorn
+* Database: PostgreSQL with persistent volume
+* Networking: Internal Docker network
+
+---
+
+## Prerequisites
+
+Make sure you have installed:
+
+* Docker
+* Docker Compose
 
 ---
 
 ## Quickstart
 
-### Requirements
+### 1. Clone the repository
 
-* Docker
-* Docker Compose
+```bash
+git clone <your-repo-url>
+cd <your-repo-name>
+```
 
-### Start the application
+---
+
+### 2. Setup environment variables
 
 ```bash
 cp .env.example .env
+```
+
+> [!IMPORTANT]
+> You must create a `.env` file before starting the application.
+
+---
+
+### 3. Start the application
+
+```bash
 docker compose up -d --build
 ```
 
-### Access the application
+---
+
+### 4. Access the application
 
 * Frontend: http://localhost:8282
 * Backend API: http://localhost:8001/api
@@ -63,7 +101,9 @@ docker compose up -d --build
 docker compose logs -f
 ```
 
-### Test API
+---
+
+## Test API
 
 ```bash
 curl http://localhost:8001/api/articles
@@ -74,34 +114,41 @@ curl http://localhost:8001/api/tags
 
 ## Configuration
 
-Configuration is handled via the `.env` file.
+All configuration is handled via the `.env` file.
+An example configuration file is provided here: [.env.example](.env.example)
 
-### Important variables
+Copy it to create your own environment file:
 
-```env
-POSTGRES_DB=conduit
-POSTGRES_USER=conduit
-POSTGRES_PASSWORD=your_password
-POSTGRES_HOST=database
-POSTGRES_PORT=5432
-
-BACKEND_PORT=8001
-FRONTEND_PORT=8282
-
-FRONTEND_API_URL=http://localhost:8001/api
+```bash
+cp .env.example .env
 ```
 
-### Notes
+```bash
+### Environment Variables
 
-* `FRONTEND_API_URL` is injected during the frontend build process
-* No sensitive data is stored in the repository
-* `.env` is ignored via `.gitignore`
+| Variable          | Description                         |
+| ----------------- | ----------------------------------- |
+| POSTGRES_DB       | Name of the PostgreSQL database     |
+| POSTGRES_USER     | Database user                       |
+| POSTGRES_PASSWORD | Database password                   |
+| POSTGRES_HOST     | Database host (Docker service name) |
+| POSTGRES_PORT     | Database port                       |
+| BACKEND_PORT      | Port exposed by backend             |
+| FRONTEND_PORT     | Port exposed by frontend            |
+| FRONTEND_API_URL  | API URL used by frontend            |
+| SECRET_KEY        | Django secret key                   |
+| DEBUG             | Enable/disable debug mode           |
+| ALLOWED_HOSTS     | Allowed Django hosts                |
+
+
+```
+> [!WARNING]
+> Never commit your `.env` file to GitHub.
 
 ---
 
-## Repository Contents
-
-```
+## Repository Structure
+```bash
 .
 ├── conduit-backend/        # Django backend
 ├── conduit-frontend/       # Angular frontend
@@ -112,18 +159,32 @@ FRONTEND_API_URL=http://localhost:8001/api
 
 ---
 
-## Architecture Overview
+## Implementation Details
 
-* **Frontend:** Angular app served via Nginx
-* **Backend:** Django application running with Gunicorn (WSGI)
-* **Database:** PostgreSQL with persistent volume
-* **Networking:** Internal Docker network
+* Multi-stage builds are used for both frontend and backend
+* Backend runs with Gunicorn instead of Django’s development server
+* Frontend build injects API URL at build time
+* Database is persisted using Docker volumes
+* Services communicate via an internal Docker network
+* Restart policy is set to `unless-stopped`
 
 ---
 
 ## Notes
 
-* The backend uses Gunicorn instead of Django’s development server
-* Multi-stage builds are used for both frontend and backend
-* Restart policy is set to `unless-stopped` for stability
-* Database data is persisted using Docker volumes
+* The backend connects to PostgreSQL using environment variables
+* The frontend dynamically receives the API URL during build
+* No sensitive data is stored in the repository
+* `.env` is excluded via `.gitignore`
+
+---
+
+## Summary
+
+This setup provides a clean and production-oriented container architecture with:
+
+* Separation of concerns
+* Secure configuration handling
+* Scalable service structure
+
+---

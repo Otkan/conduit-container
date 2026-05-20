@@ -11,6 +11,7 @@ The project consists of a frontend (Angular), backend (Django), and a PostgreSQL
 * [Prerequisites](#prerequisites)
 * [Quickstart](#quickstart)
 * [Usage](#usage)
+* [Deployment](#deployment)
 * [Test API](#test-api)
 * [Configuration](#configuration)
 * [Repository Structure](#repository-structure)
@@ -103,6 +104,65 @@ docker compose logs -f
 
 ---
 
+## Deployment
+
+The project includes a GitHub Actions workflow for automated deployment to a cloud VM via SSH.
+
+The deployment workflow is located in:
+
+```bash
+.github/workflows/deployment.yaml
+```
+
+### Deployment Process
+
+The workflow performs the following steps:
+
+1. Opens an SSH connection to the target server
+2. Navigates to the project directory
+3. Pulls the latest changes from the repository
+4. Stops running containers
+5. Rebuilds and starts the updated containers using Docker Compose
+
+### GitHub Secrets
+
+The deployment workflow uses GitHub repository secrets for sensitive configuration.
+
+Required secrets:
+
+| Secret Name     | Description                                          |
+| --------------- | ---------------------------------------------------- |
+| SSH_HOST        | Server IP or hostname                                |
+| SSH_USER        | SSH username                                         |
+| SSH_PRIVATE_KEY | Private SSH key used for deployment                  |
+| PROJECT_PATH    | Absolute path to the project directory on the server |
+
+### Trigger Deployment
+
+Deployment is triggered automatically on push to the `main` branch.
+
+### Start Deployment Manually
+
+```bash
+git push origin main
+```
+
+### Verify Deployment
+
+After deployment, verify the running containers:
+
+```bash
+docker compose ps
+```
+
+View logs:
+
+```bash
+docker compose logs -f
+```
+
+---
+
 ## Test API
 
 ```bash
@@ -142,19 +202,22 @@ cp .env.example .env
 
 
 ```
+
 > [!WARNING]
 > Never commit your `.env` file to GitHub.
 
 ---
 
 ## Repository Structure
+
 ```bash
 .
-├── conduit-backend/        # Django backend
-├── conduit-frontend/       # Angular frontend
-├── docker-compose.yaml     # Service orchestration
-├── .env.example            # Example configuration
-├── README.md               # Documentation
+├── conduit-backend/              # Django backend
+├── conduit-frontend/             # Angular frontend
+├── .github/workflows/            # GitHub Actions workflows
+├── docker-compose.yaml           # Service orchestration
+├── .env.example                  # Example configuration
+├── README.md                     # Documentation
 ```
 
 ---
@@ -167,6 +230,7 @@ cp .env.example .env
 * Database is persisted using Docker volumes
 * Services communicate via an internal Docker network
 * Restart policy is set to `unless-stopped`
+* Deployment is automated using GitHub Actions and SSH
 
 ---
 
@@ -176,6 +240,8 @@ cp .env.example .env
 * The frontend dynamically receives the API URL during build
 * No sensitive data is stored in the repository
 * `.env` is excluded via `.gitignore`
+* SSH credentials are handled via GitHub repository secrets
+* The deployment workflow automatically updates the running containers on the server
 
 ---
 
@@ -186,5 +252,6 @@ This setup provides a clean and production-oriented container architecture with:
 * Separation of concerns
 * Secure configuration handling
 * Scalable service structure
+* Automated deployment workflow
 
 ---
